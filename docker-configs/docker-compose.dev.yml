@@ -1,0 +1,266 @@
+services:
+  auth_microservice:
+    container_name: auth_microservice
+    build:
+      context: ../auth_microservice
+      dockerfile: Dockerfile
+    ports:
+      - "50051:50051"
+    depends_on:
+      - user_microservice
+    env_file: ../auth_microservice/.env
+    networks:
+      - mynetwork
+
+  user_microservice:
+    container_name: user_microservice
+    build:
+      context: ../user_microservice
+      dockerfile: Dockerfile
+    ports:
+      - "50052:50052"
+    restart: always
+    depends_on:
+      - postgres_server
+    env_file: ../user_microservice/.env
+    networks:
+      - mynetwork
+
+  session_microservice:
+    container_name: session_microservice
+    build:
+      context: ../session_microservice
+      dockerfile: Dockerfile
+    ports:
+      - "50053:50053"
+    depends_on:
+      - redis_server
+    env_file: ../session_microservice/.env
+    networks:
+      - mynetwork
+
+  chat_microservice:
+    container_name: chat_microservice
+    build:
+      context: ../chat_microservice
+      dockerfile: Dockerfile
+    ports:
+      - "50054:50054"
+    depends_on:
+      - mongodb
+    env_file: ../chat_microservice/.env
+    networks:
+      - mynetwork
+
+  message_microservice:
+    container_name: message_microservice
+    build:
+      context: ../message_microservice
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+      - "81:81"
+    depends_on:
+      - chat_microservice
+      - mongodb
+    env_file: ../message_microservice/.env
+    networks:
+      - mynetwork
+
+  gateway_microservice:
+    container_name: gateway_microservice
+    build:
+      context: ../gateway_microservice
+      dockerfile: Dockerfile
+    ports:
+      - "5050:5050"
+    depends_on:
+      - session_microservice
+      - user_microservice
+      - auth_microservice
+    env_file: ../gateway_microservice/.env
+    networks:
+      - mynetwork
+
+  web_server:
+    image: nginx
+    volumes:
+      - ../nginx_proxy_server/templates:/etc/nginx/templates
+      - ../nginx_proxy_server/config/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "8080:80"
+    environment:
+      - NGINX_HOST=foobar.com
+      - NGINX_PORT=80
+    depends_on:
+      - session_microservice
+      - user_microservice
+      - auth_microservice
+    networks:
+      - mynetwork
+
+  mongodb:
+    image: mongo:5.0
+    container_name: mongo_db
+    restart: always
+    ports:
+      - "27017:27017"
+    command: mongod --noauth
+    volumes:
+      - ../data/mongodb_data:/data/db
+      - ../data/common/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    networks:
+      - mynetwork
+
+  postgres_server:
+    image: postgres:latest
+    container_name: postgres_server
+    env_file:
+      - ../config/postgre.env
+    ports:
+      - "5432:5432"
+    volumes:
+      - ../data/postgres_data:/var/lib/postgresql/data
+    networks:
+      - mynetwork
+
+  redis_server:
+    image: redis:latest
+    container_name: redis_server
+    ports:
+      - "6379:6379"
+    environment:
+      - REDIS_HOST=redis_server
+      - REDIS_PORT=6379
+    volumes:
+      - ../data/redis_data:/data
+    networks:
+      - mynetwork
+
+  cassandra:
+    container_name: cassandra
+    image: cassandra:latest
+    environment:
+      - CASSANDRA_CLUSTER_NAME=mycluster  # Имя кластера
+      - CASSANDRA_LISTENER_HTTP_PORT=8080  # Порт для HTTP-интерфейса (если нужно)
+      - CASSANDRA_DC=dc1  # Имя дата-центра
+      - CASSANDRA_RACK=rack1  # Имя стояка
+    ports:
+      - "9042:9042"  # Порт Cassandra для CQL (по умолчанию)
+      - "7000:7000"  # Порт для передачи данных между нодами (в кластере)
+      - "7001:7001"  # Порт для защищенной передачи данных
+      - "7199:7199"  # Порт для JMX (мониторинг)
+    networks:
+      - mynetwork
+    restart: always
+    volumes:
+      - cassandra-data:/var/lib/cassandra  # Монтирование для сохранения данных
+    command: ["cassandra", "-f"]
+
+  postgres_exporter:
+    container_name: postgres_exporter
+    image: wrouesnel/postgres_exporter:latest
+    ports:
+      - "9187:9187"
+    environment:
+      - DATA_SOURCE_NAME=postgresql://admin:admin@postgres_server:5432/telegramm
+    networks:
+      - mynetwork
+    restart: always
+
+  mongodb_exporter:
+    container_name: mongodb_exporter
+    image: bitnami/mongodb-exporter:latest
+    ports:
+      - "9216:9216"
+    env_file:
+      - ../config/mongo.env
+    depends_on:
+      - mongodb
+    networks:
+      - mynetwork
+    restart: always
+
+  redis_exporter:
+    container_name: redis_exporter
+    image: oliver006/redis_exporter:latest
+    ports:
+      - "9121:9121"
+    environment:
+      - REDIS_ADDR=redis://redis:6379
+    networks:
+      - mynetwork
+    restart: always
+
+  cassandra_exporter:
+    container_name: cassandra_exporter
+    image: aurelijus/cassandra-exporter:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - CASSANDRA_CLUSTER_NAME=mycluster
+      - CASSANDRA_HOST=cassandra
+      - CASSANDRA_PORT=9042
+    depends_on:
+      - cassandra
+    networks:
+      - mynetwork
+    restart: always
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - "9092:9092"
+
+
+  # notification_microservice 9017:9017
+
+  # jmx_exporter:
+  #   image: bitnami/jmx-exporter:latest
+  #   container_name: jmx_exporter
+  #   ports:
+  #     - "8080:8080"
+  #   volumes:
+  #     - ./kafka_jmx_config.yml:/config.yml  # Конфигурация метрик JMX Exporter
+  #   environment:
+  #     - JAVA_OPTS=-javaagent:/opt/jmx_prometheus_javaagent.jar=8080:/config.yml
+  #   depends_on:
+  #     - kafka
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ../prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - grafana
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "4050:3000"
+    depends_on:
+      - user_microservice
+      - auth_microservice
+      - gateway_microservice
+      - session_microservice
+    env_file:
+      - ../config/grafana.env
+
+networks:
+  mynetwork:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  mongodb_data:
+    driver: local

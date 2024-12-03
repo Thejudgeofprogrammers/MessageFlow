@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package content;
+
+service ContentService {
+    rpc DeleteAvatarUser        (DeleteAvatarUserRequest)       returns (DeleteAvatarUserResponse);
+    rpc FindUserAvatar          (FindUserAvatarRequest)         returns (FindUserAvatarResponse);
+    rpc FindUserAvatarArray     (FindUserAvatarArrayRequest)    returns (FindUserAvatarArrayResponse);
+    rpc UploadAvatarUser        (UploadAvatarUserRequest)       returns (UploadAvatarUserResponse);
+}
+
+message UploadAvatarUserRequest {
+    int32 user_id = 1;
+    string avatar_url = 2;
+}
+
+message FindUserAvatarRequest {
+    int32 user_id = 1;
+    int32 avatar_id = 2;
+}
+
+message FindUserAvatarArrayRequest {
+    int32 user_id = 1;
+}
+
+message DeleteAvatarUserRequest {
+    int32 user_id = 1;
+    int32 avatar_id = 2;
+}
+
+message DeleteAvatarUserResponse {
+    string message = 1;
+    int32 status = 2;
+}
+
+message FindUserAvatarResponse {
+    string message = 1;
+    int32 status = 2;
+    AvatarData data = 3;
+}
+
+message FindUserAvatarArrayResponse {
+    string message = 1;
+    int32 status = 2;
+    repeated AvatarData data = 3;
+}
+
+message UploadAvatarUserResponse {
+    string message = 1;
+    int32 status = 2;
+}
+
+message AvatarData {
+    int32 avatarId = 1;
+    string avatarUrl = 2;
+}

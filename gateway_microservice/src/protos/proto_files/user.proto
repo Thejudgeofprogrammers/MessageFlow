@@ -1,0 +1,191 @@
+syntax = "proto3";
+
+package user;
+
+service UserService {
+    rpc CreateNewUser           (CreateNewUserRequest)          returns (CreateNewUserResponse);
+    rpc FindUserById            (FindUserByIdRequest)           returns (FindUserByIdResponse);
+    rpc FindUserByUsername      (FindUserByUsernameRequest)     returns (FindUserByUsernameResponse);
+    rpc FindUserByEmail         (FindUserByEmailRequest)        returns (FindUserByEmailResponse);
+    rpc FindUserByPhoneNumber   (FindUserByPhoneNumberRequest)  returns (FindUserByPhoneNumberResponse);
+    rpc AddChatToUser           (AddChatToUserRequest)          returns (AddChatToUserResponse);
+    rpc RemoveChatFromUser      (RemoveChatFromUserRequest)     returns (RemoveChatFromUserResponse);
+    rpc RemoveArrayChat         (RemoveArrayChatRequest)        returns (RemoveArrayChatResponse);
+    rpc RemoveAccount           (RemoveAccountRequest)          returns (RemoveAccountResponse);
+    rpc GetPasswordUser         (GetPasswordUserRequest)        returns (GetPasswordUserResponse);
+    
+    rpc GetUserProfile          (GetUserProfileRequest)         returns (GetUserProfileResponse);
+    rpc UpdateUserProfile       (UpdateUserProfileRequest)      returns (UpdateUserProfileResponse);
+    rpc UpdateUserPassword      (UpdateUserPasswordRequest)     returns (UpdateUserPasswordResponse);
+    rpc ToggleUserProfileCheck  (ToggleUserProfileCheckRequset) returns (ToggleUserProfileCheckResponse);
+}
+
+message ToggleUserProfileCheckRequset {
+    bool toggle = 1;
+}
+
+message ToggleUserProfileCheckResponse {
+    bool success = 1;
+}
+
+message GetUserProfileRequest {
+    int32 user_id = 1;
+    int32 whoFind = 2;
+}
+
+message UpdateUserProfileRequest {
+    int32 user_id = 1;
+    string description = 2;
+}
+
+message UpdateUserPasswordRequest {
+    int32 user_id = 1;
+    string password = 2;
+}
+
+message GetUserProfileResponse {
+    string message = 1;
+    int32 status = 2;
+}
+
+message UpdateUserProfileResponse {
+    string message = 1;
+    int32 status = 2;
+}
+
+message UpdateUserPasswordResponse {
+    string message = 1;
+    int32 status = 2;
+}
+
+message GetPasswordUserRequest {
+    int32 user_id = 1;
+}
+
+message GetPasswordUserResponse {
+    string hashed_password = 1;
+}
+
+message RemoveAccountRequest {
+    int32 user_id = 1;
+}
+
+message RemoveAccountResponse {
+    string message = 1;
+}
+
+message RemoveArrayChatRequest {
+    string chatId = 1;
+    repeated ArrayLinkUsers data = 2;
+}
+
+message ArrayLinkUsers {
+    int32 user_id = 1;
+}
+
+message RemoveArrayChatResponse {
+    string message = 1;
+    int32 status = 2;
+}
+
+message AddChatToUserRequest {
+    int32 user_id = 1;
+    string chat_id = 2;
+}
+
+message AddChatToUserResponse {
+    ResponseMessage info = 1;
+}
+
+message RemoveChatFromUserRequest {
+    int32 user_id = 1;
+    string chat_id = 2;
+}
+
+message RemoveChatFromUserResponse {
+    ResponseMessage info = 1;
+}
+
+message CreateNewUserRequest {
+    string email = 1;
+    string password_hash = 2;
+    string phone_number = 3;
+    string username = 4;
+}
+
+message CreateNewUserResponse {
+    ResponseMessage info = 1;
+}
+
+message FindUserByIdRequest {
+    int32 user_id = 1;
+}
+
+message FindUserByIdResponse {
+    oneof user {
+        UserDataId user_data = 1;
+        UserNotFoundResponse not_found = 2;
+    }
+}
+
+message UserDataId {
+    int32 user_id = 1;
+    string phone_number = 2;
+    string email = 3;
+    string password_hash = 4;
+    string username = 5;
+    repeated string chatReferences = 6;
+}
+
+message FindUserByUsernameRequest {
+    string username = 1;
+}
+
+message FindUserByUsernameResponse {
+    repeated UserArray users = 1;
+}
+
+message FindUserByEmailRequest {
+    string email = 1;
+}
+
+message FindUserByEmailResponse {
+    oneof user {
+        UserData user_data = 1;
+        UserNotFoundResponse not_found = 2;
+    }
+}
+
+message FindUserByPhoneNumberRequest {
+    string phone_number = 1;
+}
+
+message FindUserByPhoneNumberResponse {
+    oneof user {
+        UserData user_data = 1;
+        UserNotFoundResponse not_found = 2;
+    }
+}
+
+message UserData {
+    int32 user_id = 1;
+    string phone_number = 2;
+    string email = 3;
+    string password_hash = 4;
+    string username = 5;
+}
+
+message UserNotFoundResponse {
+    string message = 1;
+    int32 status = 2;
+}
+
+message ResponseMessage {
+    string message = 1;
+    int32 status = 2;
+}
+
+message UserArray {
+    int32 user_id = 1;
+    string username = 2;
+}

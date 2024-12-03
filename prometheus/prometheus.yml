@@ -1,0 +1,7 @@
+global:
+  scrape_interval: 15s  # интервал сбора метрик
+
+scrape_configs:
+  - job_name: 'telegramm'  # имя задания для вашего приложения
+    static_configs:
+      - targets: ['postgres_exporter:9187', 'mongodb_exporter:9216', 'auth_microservice:50051', 'user_microservice:50052', 'session_microservice:50053', 'chat_microservice:50054', 'message_microservice:50055']

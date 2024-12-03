@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package session_user;
+
+service SessionUserService {
+    rpc SaveUserSession (SaveUserSessionRequest) returns (SaveUserSessionResponse);
+    rpc GetUserSession (GetUserSessionRequest) returns (GetUserSessionResponse);
+    rpc DeleteUserSession (DeleteUserSessionRequest) returns (DeleteUserSessionResponse);
+}
+  
+message SaveUserSessionRequest {
+    int32 user_id = 1;
+    string jwt_token = 2;
+}
+  
+message SaveUserSessionResponse {
+    string message = 1;
+}
+  
+message GetUserSessionRequest {
+    int32 user_id = 1;
+}
+  
+message GetUserSessionResponse {
+    int32 user_id = 1;
+    string jwt_token = 2;
+}
+  
+message DeleteUserSessionRequest {
+    int32 user_id = 1;
+    string jwt_token = 2;
+}
+  
+message DeleteUserSessionResponse {
+    string message = 1;
+    int32 status = 2;
+}
+  

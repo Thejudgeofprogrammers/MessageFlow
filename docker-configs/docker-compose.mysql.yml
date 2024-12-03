@@ -1,0 +1,20 @@
+services:
+  
+  mysql_server:
+    image: mysql:latest
+    container_name: mysql_server
+    env_file:
+      - ../config/mysql.env
+    ports:
+      - "3306:3306"
+    volumes:
+      - ../data/mysql_data:/var/lib/mysql
+    networks:
+      - telegramm_network
+
+volumes:
+  mysql_data:
+
+networks:
+  telegramm_network:
+    driver: bridge

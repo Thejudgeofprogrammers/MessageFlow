@@ -1,0 +1,24 @@
+{
+    "name": "telegramm",
+    "version": "0.0.1",
+    "description": "",
+    "author": "",
+    "private": true,
+    "license": "UNLICENSED",
+    "scripts": {
+        "word": "./scripts/find_word.sh",
+        "dev:build": "docker compose -f ./docker-configs/docker-compose.dev.yml up --build",
+        "prod:build": "docker compose -f ./docker-configs/docker-compose.prod.yml up --build",
+        "del:cont": "python3 ./scripts/del.py",
+        "check:len": "./scripts/len.sh",
+        "start:mysql_only": "docker-compose -f ./docker-configs/docker-compose.mysql.yml up --build",
+        "gen:proto_files": "protoc --experimental_allow_proto3_optional --proto_path=./protos/proto_files --plugin=protoc-gen-ts=$(pwd)/node_modules/ts-proto/protoc-gen-ts_proto --ts_out=./protos/proto_gen_files ./protos/proto_files/*.proto",
+        "gen:proto_files_dir": "node scripts/copy.js && protoc --experimental_allow_proto3_optional --proto_path=./protos/proto_files --plugin=protoc-gen-ts=$(pwd)/node_modules/ts-proto/protoc-gen-ts_proto --ts_out=./protos/proto_gen_files ./protos/proto_files/*.proto"
+    },
+    "devDependencies": {
+        "ts-proto": "^2.2.5"
+    },
+    "dependencies": {
+        "fs-extra": "^11.2.0"
+    }
+}

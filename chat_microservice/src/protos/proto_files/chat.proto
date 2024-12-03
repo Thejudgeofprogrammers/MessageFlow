@@ -1,0 +1,204 @@
+syntax = "proto3";
+
+package chat;
+
+import "google/protobuf/timestamp.proto";
+
+// Определение сервиса
+service ChatService {
+    rpc CreateNewChat(CreateNewChatRequest) returns (CreateNewChatResponse);
+    rpc GetChatById(GetChatByIdRequest) returns (GetChatByIdResponse);
+    rpc GetChatByChatName(GetChatByChatNameRequest) returns (GetChatByChatNameResponse);
+    rpc UpdateChatById(UpdateChatByIdRequest) returns (UpdateChatByIdResponse);
+    rpc DeleteChatById(DeleteChatByIdRequest) returns (DeleteChatByIdResponse);
+    rpc AddUserToChat(AddUserToChatRequest) returns (AddUserToChatResponse);
+    rpc LoadToChat(LoadToChatRequest) returns (LoadToChatResponse);
+    rpc LeaveFromChat(LeaveFromChatRequest) returns (LeaveFromChatResponse);
+    rpc PermissionToAdmin(PermissionToAdminRequest) returns (PermissionToAdminResponse);
+    rpc PermissionToMember(PermissionToMemberRequest) returns (PermissionToMemberResponse);
+    rpc RemoveUserFromChat(RemoveUserFromChatRequest) returns (RemoveUserFromChatResponse);
+    rpc KickUserFromChat(KickUserFromChatRequest) returns (KickUserFromChatResponse);
+    rpc GetTokenAndAddToChat(GetTokenAndAddToChatRequest) returns (GetTokenAndAddToChatResponse);
+}
+
+message GetTokenAndAddToChatRequest {
+    int32 user_id = 1;
+    string chat_id = 2;
+}
+
+message GetTokenAndAddToChatResponse {
+    string message = 1;
+    int32 status = 2;
+}
+
+message KickUserFromChatRequest {
+    int32 user_id = 1;
+    int32 participantId = 2;
+    string chat_id = 3;
+}
+
+message KickUserFromChatResponse {
+    string message = 1;
+    int32 status = 2;
+}
+
+message PermissionToMemberRequest {
+    int32 user_id = 1;
+    string chat_id = 2;
+    int32 participantId = 3;
+}
+
+message PermissionToMemberResponse {
+    string message = 1;
+    int32 status = 2;
+}
+
+message PermissionToAdminRequest {
+    int32 user_id = 1;
+    string chat_id = 2;
+    int32 participantId = 3;
+}
+
+message PermissionToAdminResponse {
+    string message = 1;
+    int32 status = 2;
+}
+
+message CreateNewChatRequest {
+    string chatName = 1;
+    string chatType = 2;
+    int32 user_id = 3;
+}
+
+message CreateNewChatResponse {
+    string chat_id = 1;
+}
+
+message GetChatByIdRequest {
+    string chat_id = 1;
+}
+
+message GetChatByIdResponse {
+    oneof result {
+        Chat chat_data = 1;
+        ErrorResponse not_found = 2;
+    }
+}
+
+message GetChatByChatNameRequest {
+    string chatName = 1;
+}
+
+message GetChatByChatNameResponse {
+    repeated ChatIds chat_data = 1;
+}
+
+message ChatIds {
+    string chat_id = 1;
+    string chatName = 2;
+}
+
+message UpdateChatByIdRequest {
+    string chat_id = 1;
+    int32 user_id = 2;
+    optional string chatName = 3;
+    optional string chatType = 4;
+    optional string description = 5;
+}
+
+message UpdateChatByIdResponse {
+    GenericResponse response = 1;
+}
+
+message DeleteChatByIdRequest {
+    int32 user_id = 1;
+    string chat_id = 2;
+}
+
+message DeleteChatByIdResponse {
+    message Response {
+      string message = 1;
+      int32 status = 2;
+    }
+    Response response = 1;
+  
+    message Info {
+      string chatId = 1;
+      repeated int32 data = 2;
+    }
+    Info info = 2;
+}
+
+message AddUserToChatRequest {
+    string chat_id = 1;
+    ChatParticipant participant = 2;
+}
+
+message AddUserToChatResponse {
+    GenericResponse response = 1;
+}
+
+message RemoveUserFromChatRequest {
+    string chat_id = 1;
+    int32 user_id = 2;
+}
+
+message RemoveUserFromChatResponse {
+    GenericResponse response = 1;
+}
+
+message LoadToChatRequest {
+    string chat_id = 1;
+    int32 user_id = 2;
+}
+
+message LoadToChatResponse {
+    GenericResponse response = 1;
+}
+
+message LeaveFromChatRequest {
+    string chat_id = 1;
+    int32 user_id = 2;
+}
+
+message LeaveFromChatResponse {
+    GenericResponse response = 1;
+}
+
+message Chat {
+    string chat_id = 1;
+    string chatName = 2;
+    string chatType = 3;
+    LastMessage lastMessage = 4;
+    repeated ChatParticipant participants = 5;
+    repeated Message messages = 6;
+    google.protobuf.Timestamp createdAt = 7;
+}
+
+message LastMessage {
+    string message_id = 1;
+    int32 sender_id = 2;
+    string preview = 3;
+}
+
+message ChatParticipant {
+    int32 user_id = 1;
+    string role = 2; // 'owner', 'admin', 'member'
+}
+
+message Message {
+    string message_id = 1;
+    int32 sender_id = 2;
+    string text = 3;
+    google.protobuf.Timestamp timestamp = 4;
+}
+
+message ErrorResponse {
+    string message = 1;
+    int32 status = 2;
+}
+
+message GenericResponse {
+    string message = 1;
+    int32 status = 2;
+}

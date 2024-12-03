@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package auth;
+
+service AuthService {
+    rpc Register (RegisterRequest) returns (RegisterResponse);
+    rpc Login (LoginRequest) returns (LoginResponse);
+    rpc CheckPassword (CheckPasswordRequest) returns (CheckPasswordResponse);
+    rpc ToHashPassword (ToHashPasswordRequest) returns (ToHashPasswordResponse);
+}
+
+message ToHashPasswordRequest {
+  string password = 1;
+}
+
+message ToHashPasswordResponse {
+  string hashedPassword = 1;
+}
+
+message CheckPasswordRequest {
+  string password = 1;
+  string hashedPassword = 2;
+}
+
+message CheckPasswordResponse {
+  bool exist = 1;
+}
+
+message RegisterRequest {
+  string username = 1;
+  string email = 2;
+  string password = 3;
+  string phone_number = 4;
+}
+
+message RegisterResponse {
+  string username = 1;
+  string email = 2;
+  string password_hash = 3;
+  string phone_number = 4;
+}
+
+message LoginRequest {
+  oneof login_method {
+    string phone_number = 1;
+    string email = 2;
+  }
+  string password = 3;
+  string password_hash = 4;
+  int32 userId = 5;
+}
+
+message LoginResponse {
+  int32 user_id = 1;
+  string jwt_token = 2;
+}
+
+
