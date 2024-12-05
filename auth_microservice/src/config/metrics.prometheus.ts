@@ -3,25 +3,53 @@ import {
     makeHistogramProvider,
 } from '@willsoto/nestjs-prometheus';
 
-export const prometheusProviders = [
+export const prometheusProvidersAuth = [
+    // Метрики для хеширования пароля
     makeCounterProvider({
-        name: 'PROM_METRIC_AUTH_LOGIN_TOTAL',
-        help: 'Total number of logins',
+        name: 'TO_HASH_PASSWORD_TOTAL',
+        help: 'Total number of ToHashPassword requests, categorized by success or failure',
+        labelNames: ['result'],
     }),
+
+    makeHistogramProvider({
+        name: 'TO_HASH_PASSWORD_DURATION',
+        help: 'Duration of ToHashPassword requests',
+        buckets: [0.1, 0.5, 1, 2, 5, 10],
+    }),
+
+    // Метрики для CheckPassword
     makeCounterProvider({
-        name: 'PROM_METRIC_AUTH_LOGIN_FAILURE_TOTAL',
-        help: 'Total number of failed login attempts',
+        name: 'AUTH_CHECK_PASSWORD_TOTAL',
+        help: 'Total number of CheckPassword requests, categorized by success or failure',
+        labelNames: ['result'],
     }),
     makeHistogramProvider({
-        name: 'PROM_METRIC_AUTH_LOGIN_DURATION',
-        help: 'Duration of login requests',
+        name: 'AUTH_CHECK_PASSWORD_DURATION',
+        help: 'Duration of CheckPassword requests',
+        buckets: [0.1, 0.5, 1, 2, 5],
+    }),
+
+    // Метрики для Register
+    makeCounterProvider({
+        name: 'AUTH_REGISTER_TOTAL',
+        help: 'Total number of Register requests, categorized by success or failure',
+        labelNames: ['result'],
     }),
     makeHistogramProvider({
-        name: 'PROM_METRIC_AUTH_REGISTER_DURATION',
-        help: 'Duration of registration requests',
+        name: 'AUTH_REGISTER_DURATION',
+        help: 'Duration of Register requests',
+        buckets: [0.1, 0.5, 1, 2, 5],
     }),
+
+    // Метрики для Login
     makeCounterProvider({
-        name: 'PROM_METRIC_AUTH_REGISTER_TOTAL',
-        help: 'Total number of registrations',
+        name: 'AUTH_LOGIN_TOTAL',
+        help: 'Total number of Login requests, categorized by success or failure',
+        labelNames: ['result'],
+    }),
+    makeHistogramProvider({
+        name: 'AUTH_LOGIN_DURATION',
+        help: 'Duration of Login requests',
+        buckets: [0.1, 0.5, 1, 2, 5],
     }),
 ];

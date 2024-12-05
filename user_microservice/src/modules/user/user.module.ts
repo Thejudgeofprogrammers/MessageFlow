@@ -4,10 +4,12 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 import { prometheusProviders } from 'src/config/metrics.prometheus';
 import { PrismaService } from '../prisma/prisma.service';
+import { LoggerModule } from '../logger/logger.module';
+import { WinstonLoggerService } from '../logger/logger.service';
 
 @Module({
-    imports: [PrismaModule, PrometheusModule],
-    controllers: [UserService],
+    imports: [PrismaModule, LoggerModule, PrometheusModule],
+    controllers: [UserService, WinstonLoggerService],
     providers: [...prometheusProviders, PrismaService],
 })
 export class UserModule {}

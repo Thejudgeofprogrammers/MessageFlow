@@ -16,9 +16,10 @@ import { WinstonLoggerService } from '../logger/logger.service';
 @Injectable()
 export class SessionMiddleware implements NestMiddleware, OnModuleInit {
     private sessionUserMicroservice: SessionUserService;
-    private readonly logger: WinstonLoggerService;
 
     constructor(
+        private readonly logger: WinstonLoggerService,
+
         @Inject('SESSION_USER_CLIENT')
         private readonly sessionUserClient: ClientGrpc,
     ) {}

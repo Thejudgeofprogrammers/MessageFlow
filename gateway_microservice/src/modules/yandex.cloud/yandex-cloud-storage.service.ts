@@ -16,11 +16,10 @@ dotenv.config();
 
 @Injectable()
 export class YandexCloudStorageService {
-    private readonly logger: WinstonLoggerService;
     private readonly s3: S3Client;
     private readonly bucketName: string = process.env.NAME_BACKET;
 
-    constructor() {
+    constructor(private readonly logger: WinstonLoggerService) {
         this.s3 = new S3Client({
             region: process.env.YC_REGION,
             endpoint: process.env.YC_ENDPOINT,

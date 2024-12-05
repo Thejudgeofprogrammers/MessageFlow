@@ -22,10 +22,12 @@ service UserService {
 
 message ToggleUserProfileCheckRequset {
     bool toggle = 1;
+    int32 userId = 2;
 }
 
 message ToggleUserProfileCheckResponse {
-    bool success = 1;
+    string message = 1;
+    int32 status = 2;
 }
 
 message GetUserProfileRequest {

@@ -39,3 +39,12 @@ export const grpcClientOptionsChat: ClientOptions = {
         protoPath: join(__dirname, process.env.GRPC_CHAT_PROTO_PATH),
     },
 };
+
+export const grpcClientOptionsContent: ClientOptions = {
+    transport: Transport.GRPC,
+    options: {
+        url: process.env.GRPC_CONTENT_SERVICE_URL,
+        package: process.env.GRPC_CONTENT_PACKAGE,
+        protoPath: join(__dirname, process.env.GRPC_CONTENT_PROTO_PATH),
+    },
+};

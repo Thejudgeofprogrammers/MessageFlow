@@ -19,7 +19,7 @@ export class FindUserAvatarArrayResponseDTO {
 }
 
 export class FindUserAvatarRequestDTO {
-    avatarId: string;
+    avatarId: number;
     userId: number;
 }
 
@@ -31,7 +31,7 @@ export class FindUserAvatarResponseDTO {
 
 export class DeleteUserAvatarRequestDTO {
     userId: number;
-    avatarId: string;
+    avatarId: number;
 }
 
 export class DeleteUserAvatarResponseDTO {
@@ -40,9 +40,9 @@ export class DeleteUserAvatarResponseDTO {
 }
 
 export class AvatarDTO {
-    avatar_id: string;
+    avatar_id: number;
     user_id: number;
-    avatar_url: number;
+    avatar_url: string;
     is_active: boolean;
     uploaded_at: string;
     is_random: boolean;

@@ -17,12 +17,16 @@ import { InjectMetric } from '@willsoto/nestjs-prometheus';
 import { Counter, Histogram } from 'prom-client';
 import { redisConfig } from 'src/config/config.redis';
 import Redis from 'ioredis';
+import { promCondition, StatusClient } from 'src/common/status';
+import { WinstonLoggerService } from '../logger/logger.service';
 
 @Controller('SessionUserService')
 export class SessionUserService implements UserSessionInterface {
     private redis: Redis;
 
     constructor(
+        private readonly logger: WinstonLoggerService,
+
         @InjectMetric('PROM_METRIC_SESSION_SAVE_TOTAL')
         private readonly saveSessionTotal: Counter<string>,
 
@@ -46,19 +50,36 @@ export class SessionUserService implements UserSessionInterface {
 
     @GrpcMethod('SessionUserService', 'SaveUserSession')
     async SaveUserSession(
-        data: SaveUserSessionRequest,
+        payload: SaveUserSessionRequest,
     ): Promise<SaveUserSessionResponse> {
         const end = this.saveSessionDuration.startTimer();
+        this.logger.debug('Starting SaveUserSession process');
         try {
-            if (!data.userId) throw new BadRequestException('userId missing');
-            await this.redis.set(data.userId.toString(), data.jwtToken);
-            this.saveSessionTotal.inc();
-            return { message: 'User session saved successfully' };
+            const { userId, jwtToken } = payload;
+
+            if (!userId || !jwtToken) {
+                this.logger.warn('Invalid payload: missing userId or jwtToken');
+                this.saveSessionTotal.inc({ result: promCondition.failure });
+                throw new BadRequestException(
+                    StatusClient.HTTP_STATUS_BAD_REQUEST.message,
+                );
+            }
+
+            this.logger.debug(`Saving session for userId: ${userId}`);
+            await this.redis.set(userId.toString(), jwtToken);
+
+            this.logger.log(`Session saved successfully for userId: ${userId}`);
+            this.saveSessionTotal.inc({ result: promCondition.success });
+            return { message: StatusClient.HTTP_STATUS_OK.message };
         } catch (error) {
-            console.error('Error in SaveUserSession:', error);
-            throw new InternalServerErrorException('Server have problem');
+            this.logger.error('Error in SaveUserSession', error.stack);
+            this.saveSessionTotal.inc({ result: promCondition.failure });
+            throw new InternalServerErrorException(
+                StatusClient.HTTP_STATUS_INTERNAL_SERVER_ERROR.message,
+            );
         } finally {
             end();
+            this.logger.debug('SaveUserSession process completed');
         }
     }
 
@@ -67,16 +88,42 @@ export class SessionUserService implements UserSessionInterface {
         data: GetUserSessionRequest,
     ): Promise<GetUserSessionResponse> {
         const end = this.getSessionDuration.startTimer();
+        this.logger.debug('Starting GetUserSession process');
         try {
-            if (!data.userId) throw new BadRequestException('userId missing');
-            const token = await this.redis.get(data.userId.toString());
-            if (!token) throw new BadRequestException('Token missing');
-            this.getSessionTotal.inc();
-            return { userId: data.userId, jwtToken: token || '' };
+            const { userId } = data;
+            if (!userId) {
+                this.logger.warn('Invalid payload: missing userId');
+                this.getSessionTotal.inc({ result: promCondition.failure });
+                throw new BadRequestException(
+                    StatusClient.HTTP_STATUS_BAD_REQUEST.message,
+                );
+            }
+
+            this.logger.debug(`Fetching session for userId: ${userId}`);
+            const token = await this.redis.get(userId.toString());
+
+            if (!token) {
+                this.logger.warn(`No session found for userId: ${userId}`);
+                this.getSessionTotal.inc({ result: promCondition.failure });
+                throw new BadRequestException(
+                    StatusClient.HTTP_STATUS_BAD_REQUEST.message,
+                );
+            }
+
+            this.logger.log(
+                `Session fetched successfully for userId: ${userId}`,
+            );
+            this.getSessionTotal.inc({ result: promCondition.success });
+            return { userId, jwtToken: token };
         } catch (e) {
-            throw new InternalServerErrorException('Server have problem');
+            this.logger.error('Error in GetUserSession', e.stack);
+            this.getSessionTotal.inc({ result: promCondition.failure });
+            throw new InternalServerErrorException(
+                StatusClient.HTTP_STATUS_INTERNAL_SERVER_ERROR.message,
+            );
         } finally {
             end();
+            this.logger.debug('GetUserSession process completed');
         }
     }
 
@@ -85,18 +132,37 @@ export class SessionUserService implements UserSessionInterface {
         data: DeleteUserSessionRequest,
     ): Promise<DeleteUserSessionResponse> {
         const end = this.deleteSessionDuration.startTimer();
+        this.logger.debug('Starting DeleteUserSession process');
         try {
-            await this.redis.del(data.userId.toString());
-            this.deleteSessionTotal.inc();
+            const { userId } = data;
+            if (!userId) {
+                this.logger.warn('Invalid payload: missing userId');
+                this.deleteSessionTotal.inc({ result: promCondition.failure });
+                throw new BadRequestException(
+                    StatusClient.HTTP_STATUS_BAD_REQUEST.message,
+                );
+            }
+
+            this.logger.debug(`Deleting session for userId: ${userId}`);
+            await this.redis.del(userId.toString());
+
+            this.logger.log(
+                `Session deleted successfully for userId: ${userId}`,
+            );
+            this.deleteSessionTotal.inc({ result: promCondition.success });
             return {
-                message: 'User session deleted successfully',
-                status: 200,
+                message: StatusClient.HTTP_STATUS_OK.message,
+                status: StatusClient.HTTP_STATUS_OK.status,
             };
         } catch (error) {
-            console.error('Error in DeleteUserSession:', error);
-            throw new InternalServerErrorException('Server have problem');
+            this.logger.error('Error in DeleteUserSession', error.stack);
+            this.deleteSessionTotal.inc({ result: promCondition.failure });
+            throw new InternalServerErrorException(
+                StatusClient.HTTP_STATUS_INTERNAL_SERVER_ERROR.message,
+            );
         } finally {
             end();
+            this.logger.debug('DeleteUserSession process completed');
         }
     }
 }

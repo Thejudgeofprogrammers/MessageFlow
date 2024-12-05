@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { TokenService } from './token.service';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { LoggerModule } from '../logger/logger.module';
+import { WinstonLoggerService } from '../logger/logger.service';
 
 @Module({
     imports: [
@@ -16,8 +18,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
                 },
             }),
         }),
+        LoggerModule,
     ],
-    providers: [TokenService],
+    providers: [TokenService, WinstonLoggerService],
     exports: [TokenService],
 })
 export class TokenModule {}

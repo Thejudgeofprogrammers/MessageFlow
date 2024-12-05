@@ -41,8 +41,6 @@ import { WinstonLoggerService } from '../logger/logger.service';
 
 @Injectable()
 export class AuthorizeService implements OnModuleInit {
-    private readonly logger: WinstonLoggerService;
-
     @Client(grpcClientOptionsAuth)
     private readonly authClient: ClientGrpc;
     @Client(grpcClientOptionsUser)
@@ -54,7 +52,10 @@ export class AuthorizeService implements OnModuleInit {
     private userMicroservice: UserInterface;
     private sessionUserMicroservice: SessionUserService;
 
-    constructor(private readonly userServiceGateway: UserServiceGateway) {}
+    constructor(
+        private readonly userServiceGateway: UserServiceGateway,
+        private readonly logger: WinstonLoggerService,
+    ) {}
 
     onModuleInit() {
         this.authMicroservice =

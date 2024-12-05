@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import * as winston from 'winston';
 import 'winston-daily-rotate-file';
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 // Формат вывода в консоль с цветами
 const consoleFormat = winston.format.combine(
@@ -42,7 +44,7 @@ export class WinstonLoggerService {
                 winston.format.json(),
             ),
             transports: [
-                logstashTransport, // Отправка логов в Logstash
+                logstashTransport,
                 new winston.transports.Console({
                     format: consoleFormat,
                 }),

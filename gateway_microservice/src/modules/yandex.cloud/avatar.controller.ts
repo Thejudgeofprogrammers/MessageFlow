@@ -18,7 +18,7 @@ import {
     FindUserAvatarResponse,
     UploadAvatarUserRequest,
     UploadAvatarUserResponse,
-} from 'src/protos/proto_gen_files/user';
+} from 'src/protos/proto_gen_files/content';
 import { Request, Response } from 'express';
 import { promCondition, StatusClient } from 'src/common/status';
 import { errMessages, summaryData } from 'src/common/messages';

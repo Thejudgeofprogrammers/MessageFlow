@@ -11,10 +11,12 @@ export const protobufPackage = "user";
 
 export interface ToggleUserProfileCheckRequset {
   toggle: boolean;
+  userId: number;
 }
 
 export interface ToggleUserProfileCheckResponse {
-  success: boolean;
+  message: string;
+  status: number;
 }
 
 export interface GetUserProfileRequest {
@@ -174,13 +176,16 @@ export interface UserArray {
 }
 
 function createBaseToggleUserProfileCheckRequset(): ToggleUserProfileCheckRequset {
-  return { toggle: false };
+  return { toggle: false, userId: 0 };
 }
 
 export const ToggleUserProfileCheckRequset: MessageFns<ToggleUserProfileCheckRequset> = {
   encode(message: ToggleUserProfileCheckRequset, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.toggle !== false) {
       writer.uint32(8).bool(message.toggle);
+    }
+    if (message.userId !== 0) {
+      writer.uint32(16).int32(message.userId);
     }
     return writer;
   },
@@ -200,6 +205,14 @@ export const ToggleUserProfileCheckRequset: MessageFns<ToggleUserProfileCheckReq
           message.toggle = reader.bool();
           continue;
         }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.userId = reader.int32();
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -210,13 +223,19 @@ export const ToggleUserProfileCheckRequset: MessageFns<ToggleUserProfileCheckReq
   },
 
   fromJSON(object: any): ToggleUserProfileCheckRequset {
-    return { toggle: isSet(object.toggle) ? globalThis.Boolean(object.toggle) : false };
+    return {
+      toggle: isSet(object.toggle) ? globalThis.Boolean(object.toggle) : false,
+      userId: isSet(object.userId) ? globalThis.Number(object.userId) : 0,
+    };
   },
 
   toJSON(message: ToggleUserProfileCheckRequset): unknown {
     const obj: any = {};
     if (message.toggle !== false) {
       obj.toggle = message.toggle;
+    }
+    if (message.userId !== 0) {
+      obj.userId = Math.round(message.userId);
     }
     return obj;
   },
@@ -229,18 +248,22 @@ export const ToggleUserProfileCheckRequset: MessageFns<ToggleUserProfileCheckReq
   ): ToggleUserProfileCheckRequset {
     const message = createBaseToggleUserProfileCheckRequset();
     message.toggle = object.toggle ?? false;
+    message.userId = object.userId ?? 0;
     return message;
   },
 };
 
 function createBaseToggleUserProfileCheckResponse(): ToggleUserProfileCheckResponse {
-  return { success: false };
+  return { message: "", status: 0 };
 }
 
 export const ToggleUserProfileCheckResponse: MessageFns<ToggleUserProfileCheckResponse> = {
   encode(message: ToggleUserProfileCheckResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.success !== false) {
-      writer.uint32(8).bool(message.success);
+    if (message.message !== "") {
+      writer.uint32(10).string(message.message);
+    }
+    if (message.status !== 0) {
+      writer.uint32(16).int32(message.status);
     }
     return writer;
   },
@@ -253,11 +276,19 @@ export const ToggleUserProfileCheckResponse: MessageFns<ToggleUserProfileCheckRe
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1: {
-          if (tag !== 8) {
+          if (tag !== 10) {
             break;
           }
 
-          message.success = reader.bool();
+          message.message = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.status = reader.int32();
           continue;
         }
       }
@@ -270,13 +301,19 @@ export const ToggleUserProfileCheckResponse: MessageFns<ToggleUserProfileCheckRe
   },
 
   fromJSON(object: any): ToggleUserProfileCheckResponse {
-    return { success: isSet(object.success) ? globalThis.Boolean(object.success) : false };
+    return {
+      message: isSet(object.message) ? globalThis.String(object.message) : "",
+      status: isSet(object.status) ? globalThis.Number(object.status) : 0,
+    };
   },
 
   toJSON(message: ToggleUserProfileCheckResponse): unknown {
     const obj: any = {};
-    if (message.success !== false) {
-      obj.success = message.success;
+    if (message.message !== "") {
+      obj.message = message.message;
+    }
+    if (message.status !== 0) {
+      obj.status = Math.round(message.status);
     }
     return obj;
   },
@@ -288,7 +325,8 @@ export const ToggleUserProfileCheckResponse: MessageFns<ToggleUserProfileCheckRe
     object: I,
   ): ToggleUserProfileCheckResponse {
     const message = createBaseToggleUserProfileCheckResponse();
-    message.success = object.success ?? false;
+    message.message = object.message ?? "";
+    message.status = object.status ?? 0;
     return message;
   },
 };

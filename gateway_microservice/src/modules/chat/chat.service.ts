@@ -54,8 +54,6 @@ import { LoadToChatResponseDTO } from '../user/dto';
 
 @Injectable()
 export class ChatService implements OnModuleInit {
-    private readonly logger: WinstonLoggerService;
-
     @Client(grpcClientOptionsChat)
     private readonly chatClient: ClientGrpc;
     @Client(grpcClientOptionsUser)
@@ -64,7 +62,10 @@ export class ChatService implements OnModuleInit {
     private chatMicroservice: ChatInterface;
     private userMicroservice: UserServiceClient;
 
-    constructor(private readonly userService: UserService) {}
+    constructor(
+        private readonly userService: UserService,
+        private readonly logger: WinstonLoggerService,
+    ) {}
 
     onModuleInit() {
         this.chatMicroservice =
